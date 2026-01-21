@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess what is AI-generated</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .header { margin-bottom: 2rem; }
+        h1 { font-size: 2rem; margin: 0; color: var(--primary); }
+        .subtitle { color: #64748b; font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .news-card {
+            background: var(--light);
+            border: 2px solid #e2e8f0;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-real { background: var(--primary); color: white; }
+        .btn-fake { background: var(--secondary); color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            border-radius: 12px;
+            display: none;
+            font-weight: 600;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .stats {
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            color: #64748b;
+        }
+
+        .footer-campaign {
+            margin-top: 2.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        .campaign-box {
+            background: #eff6ff;
+            padding: 1rem;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+            text-align: left;
+        }
+
+        .campaign-tag {
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🔍 Guess what is AI-generated</h1>
+        <p class="subtitle">Can you distinguish real news from AI-generated fakes?</p>
+    </div>
+
+    <div id="game-zone">
+        <div class="news-card" id="news-text">Loading news...</div>
+
+        <div class="btn-group">
+            <button class="btn-real" id="real-btn" onclick="checkAnswer(true)">Real News</button>
+            <button class="btn-fake" id="fake-btn" onclick="checkAnswer(false)">AI Fake News</button>
+        </div>
+    </div>
+
+    <div id="result-area" class="result"></div>
+    
+    <div class="stats">
+        Current Progress: <span id="current-q">0</span> / <span id="total-q">10</span> | Score: <span id="score">0</span>
+    </div>
+
+    <div class="footer-campaign">
+        <div class="campaign-box">
+            <span class="campaign-tag">#AI_Literacy_Campaign</span>
+            "Schools should <strong>teach AI literacy, not ban AI</strong>."
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        // Fake News (AI Generated)
+        { text: "Last year, EV sales in Korea grew again, but Korean cars hit their lowest market share because of the popular Tesla made in China. Experts warn that Korean car sales could drop by half next year if this trend continues.", isReal: false, explanation: "Fake! This uses 'alarmist' language and unverified predictions to create fear about the domestic market." },
+        { text: "The exchange rate passed 1,480 won due to tax fights between the US and Europe, putting a heavy burden on Korea's economy. Nomura Securities predicts the rate will rise to 1,550 won by the end of the year because Korea's economy has become weaker.", isReal: false, explanation: "Fake! It mimics financial reporting but uses exaggerated numbers and speculative gloom to sound realistic." },
+        { text: "Chip exports hit a record high in January, but some say it’s a 'fake success' because unsold stocks are actually piling up. A government report shows that export numbers will drop fast starting next month because the demand for AI chips has already peaked.", isReal: false, explanation: "Fake! This creates a 'contradictory narrative' to spark confusion about positive economic data." },
+        { text: "As Ukraine shares war data with its allies, there are growing concerns that secret information about Korean weapons has been exposed. Military experts worry that the shared data includes weaknesses of Korean drones, which could put national security at risk.", isReal: false, explanation: "Fake! This targets national security fears and uses 'anonymous experts' to sound credible." },
+        { text: "Since Seoul can no longer bury its trash nearby, it was found that Seoul made secret deals with companies in the Chungnam area to dump waste there. Nearly half of the landfills in Chungnam are already full of Seoul's trash.", isReal: false, explanation: "Fake! This is a classic 'conflict-based' fake news designed to trigger regional anger." },
+        
+        // Real News
+        { text: "Hyundai is evolving from a carmaker into a robot leader after showing its new robot at CES 2026. This change has led to a record-high stock price and a much higher market value.", isReal: true, explanation: "Real! Hyundai has been consistently pivoting toward robotics and Boston Dynamics integration." },
+        { text: "The US and the EU are in a serious fight over the land of Greenland and new trade taxes. The EU plans to invest in Greenland themselves to protect it from US pressure.", isReal: true, explanation: "Real! Greenland has become a major geopolitical focus for its resources and Arctic positioning." },
+        { text: "OpenAI now uses AI to guess a user’s age and automatically block dangerous content for teenagers. This makes ChatGPT much safer for young students to use without seeing harmful info.", isReal: true, explanation: "Real! Tech companies are implementing AI-driven safety layers to protect younger demographics." },
+        { text: "Korean roasted sweet potatoes are becoming a popular, cheap lunch for workers in expensive New York. They are loved for being both healthy and much more affordable than sandwiches.", isReal: true, explanation: "Real! 'K-Wellness' foods are gaining huge viral popularity in major US cities as healthy alternatives." },
+        { text: "LG CNS is using AI to help pharmaceutical companies develop new drugs faster and more securely. Their AI agents can finish complex reports in 10% of the time it used to take humans.", isReal: true, explanation: "Real! Enterprise AI agents are currently revolutionizing R&D efficiency in the medical field." }
+    ];
+
+    // Shuffle the quiz
+    quizData.sort(() => Math.random() - 0.5);
+
+    let currentIndex = 0;
+    let score = 0;
+
+    const newsText = document.getElementById('news-text');
+    const resultArea = document.getElementById('result-area');
+    const scoreDisplay = document.getElementById('score');
+    const currentQDisplay = document.getElementById('current-q');
+    const totalQDisplay = document.getElementById('total-q');
+    const realBtn = document.getElementById('real-btn');
+    const fakeBtn = document.getElementById('fake-btn');
+
+    totalQDisplay.innerText = quizData.length;
+
+    function loadQuiz() {
+        if (currentIndex < quizData.length) {
+            newsText.innerText = quizData[currentIndex].text;
+            resultArea.style.display = 'none';
+            realBtn.disabled = false;
+            fakeBtn.disabled = false;
+            currentQDisplay.innerText = currentIndex + 1;
+        } else {
+            showFinalResult();
+        }
+    }
+
+    function checkAnswer(userChoice) {
+        const currentQuiz = quizData[currentIndex];
+        realBtn.disabled = true;
+        fakeBtn.disabled = true;
+        resultArea.style.display = 'block';
+        
+        if (userChoice === currentQuiz.isReal) {
+            score++;
+            resultArea.innerHTML = "✅ <strong>Correct!</strong> " + currentQuiz.explanation;
+            resultArea.style.background = "#dcfce7";
+            resultArea.style.color = "#166534";
+        } else {
+            resultArea.innerHTML = "❌ <strong>Wrong!</strong> " + currentQuiz.explanation;
+            resultArea.style.background = "#fee2e2";
+            resultArea.style.color = "#991b1b";
+        }
+
+        scoreDisplay.innerText = score;
+        currentIndex++;
+        
+        setTimeout(loadQuiz, 3000);
+    }
+
+    function showFinalResult() {
+        let message = score > 7 ? "Expert! You have great AI Literacy." : "Keep learning! Distinguishing AI content is a vital skill.";
+        document.getElementById('game-zone').innerHTML = `
+            <div style="padding: 2rem;">
+                <h2 style="color: var(--primary)">Campaign Completed!</h2>
+                <p style="font-size: 1.5rem;">Final Score: ${score} / ${quizData.length}</p>
+                <p>${message}</p>
+                <button onclick="location.reload()" style="margin-top:1rem; background: var(--dark); color:white;">Try Again</button>
+            </div>
+        `;
+    }
+
+    loadQuiz();
+</script>
+
+</body>
+</html>
